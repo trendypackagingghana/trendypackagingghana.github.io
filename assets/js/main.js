@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-  var WHATSAPP = '233269579956';
   var mobileQuery = window.matchMedia('(max-width: 760px)');
 
   // ---------- Mobile menu ----------
@@ -50,29 +49,6 @@
     });
   });
   if (mobileQuery.matches) faqs.forEach(function (d) { d.open = false; });
-
-  // ---------- Quote form → WhatsApp ----------
-  var form = document.getElementById('quote-form');
-  if (form) {
-    var product = new URLSearchParams(location.search).get('product');
-    if (product && form.elements.details && !form.elements.details.value) {
-      form.elements.details.value = 'Product: ' + product + '\nCapacity: \nColour: ';
-    }
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      if (!form.reportValidity()) return;
-      var f = form.elements;
-      var lines = ['Hello Trendy Packaging, I would like a quote.', ''];
-      [['Name', f.name], ['Company', f.company], ['Phone', f.phone], ['Quantity', f.quantity]]
-        .forEach(function (pair) {
-          var v = pair[1].value.trim();
-          if (v) lines.push(pair[0] + ': ' + v);
-        });
-      lines.push('', f.details.value.trim());
-      var url = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(lines.join('\n'));
-      window.open(url, '_blank', 'noopener');
-    });
-  }
 
   // ---------- Map: load the heavy Google embed only when asked ----------
   var map = document.querySelector('.map[data-embed]');
