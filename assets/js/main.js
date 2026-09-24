@@ -1,245 +1,111 @@
-/**
-* Template Name: Ninestars
-* Updated: Sep 18 2023 with Bootstrap v5.3.2
-* Template URL: https://bootstrapmade.com/ninestars-free-bootstrap-3-theme-for-creative/
-* Author: BootstrapMade.com
-* License: https://bootstrapmade.com/license/
-*/
-(function() {
-  "use strict";
+(function () {
+  'use strict';
 
-  /**
-   * Easy selector helper function
-   */
-  const select = (el, all = false) => {
-    el = el.trim()
-    if (all) {
-      return [...document.querySelectorAll(el)]
-    } else {
-      return document.querySelector(el)
-    }
+  var WHATSAPP = '233269579956';
+  var mobileQuery = window.matchMedia('(max-width: 760px)');
+
+  // ---------- Mobile menu ----------
+  var menuBtn = document.querySelector('.menu-btn');
+  var mobileNav = document.getElementById('mobile-nav');
+  function setMenu(open) {
+    if (!menuBtn || !mobileNav) return;
+    mobileNav.classList.toggle('open', open);
+    menuBtn.setAttribute('aria-expanded', String(open));
+    menuBtn.textContent = open ? '×' : '☰';
+  }
+  if (menuBtn && mobileNav) {
+    menuBtn.addEventListener('click', function () {
+      setMenu(!mobileNav.classList.contains('open'));
+    });
+    mobileNav.addEventListener('click', function (e) {
+      if (e.target.closest('a')) setMenu(false);
+    });
   }
 
-  /**
-   * Easy event listener function
-   */
-  const on = (type, el, listener, all = false) => {
-    let selectEl = select(el, all)
-    if (selectEl) {
-      if (all) {
-        selectEl.forEach(e => e.addEventListener(type, listener))
-      } else {
-        selectEl.addEventListener(type, listener)
-      }
-    }
+  // ---------- Product filter tabs ----------
+  var tabs = document.querySelectorAll('.tab[data-filter]');
+  var products = document.querySelectorAll('.product[data-cat]');
+  function filterProducts(cat) {
+    tabs.forEach(function (t) {
+      t.setAttribute('aria-pressed', String(t.dataset.filter === cat));
+    });
+    products.forEach(function (p) {
+      p.hidden = cat !== 'All' && p.dataset.cat !== cat;
+    });
   }
-
-  /**
-   * Easy on scroll event listener 
-   */
-  const onscroll = (el, listener) => {
-    el.addEventListener('scroll', listener)
-  }
-
-  /**
-   * Navbar links active state on scroll
-   */
-  let navbarlinks = select('#navbar .scrollto', true)
-  const navbarlinksActive = () => {
-    let position = window.scrollY + 200
-    navbarlinks.forEach(navbarlink => {
-      if (!navbarlink.hash) return
-      let section = select(navbarlink.hash)
-      if (!section) return
-      if (position >= section.offsetTop && position <= (section.offsetTop + section.offsetHeight)) {
-        navbarlink.classList.add('active')
-      } else {
-        navbarlink.classList.remove('active')
-      }
-    })
-  }
-  window.addEventListener('load', navbarlinksActive)
-  onscroll(document, navbarlinksActive)
-
-  /**
-   * Scrolls to an element with header offset
-   */
-  const scrollto = (el) => {
-    let header = select('#header')
-    let offset = header.offsetHeight
-
-    let elementPos = select(el).offsetTop
-    window.scrollTo({
-      top: elementPos - offset,
-      behavior: 'smooth'
-    })
-  }
-
-  /**
-   * Back to top button
-   */
-  let backtotop = select('.back-to-top')
-  if (backtotop) {
-    const toggleBacktotop = () => {
-      if (window.scrollY > 100) {
-        backtotop.classList.add('active')
-      } else {
-        backtotop.classList.remove('active')
-      }
-    }
-    window.addEventListener('load', toggleBacktotop)
-    onscroll(document, toggleBacktotop)
-  }
-
-  /**
-   * Mobile nav toggle
-   */
-  on('click', '.mobile-nav-toggle', function(e) {
-    select('#navbar').classList.toggle('navbar-mobile')
-    this.classList.toggle('bi-list')
-    this.classList.toggle('bi-x')
-  })
-
-  /**
-   * Mobile nav dropdowns activate
-   */
-  on('click', '.navbar .dropdown > a', function(e) {
-    if (select('#navbar').classList.contains('navbar-mobile')) {
-      e.preventDefault()
-      this.nextElementSibling.classList.toggle('dropdown-active')
-    }
-  }, true)
-
-  /**
-   * Scrool with ofset on links with a class name .scrollto
-   */
-  on('click', '.scrollto', function(e) {
-    if (select(this.hash)) {
-      e.preventDefault()
-
-      let navbar = select('#navbar')
-      if (navbar.classList.contains('navbar-mobile')) {
-        navbar.classList.remove('navbar-mobile')
-        let navbarToggle = select('.mobile-nav-toggle')
-        navbarToggle.classList.toggle('bi-list')
-        navbarToggle.classList.toggle('bi-x')
-      }
-      scrollto(this.hash)
-    }
-  }, true)
-
-  /**
-   * Scroll with ofset on page load with hash links in the url
-   */
-  window.addEventListener('load', () => {
-    if (window.location.hash) {
-      if (select(window.location.hash)) {
-        scrollto(window.location.hash)
-      }
-    }
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () { filterProducts(t.dataset.filter); });
+  });
+  // Industry links jump to the catalogue with a category pre-selected
+  document.querySelectorAll('[data-show-cat]').forEach(function (a) {
+    a.addEventListener('click', function () { filterProducts(a.dataset.showCat); });
   });
 
-  /**
-   * Porfolio isotope and filter
-   */
-  window.addEventListener('load', () => {
-    let portfolioContainer = select('.portfolio-container');
-    if (portfolioContainer) {
-      let portfolioIsotope = new Isotope(portfolioContainer, {
-        itemSelector: '.portfolio-item',
-        layoutMode: 'fitRows'
+  // ---------- FAQ: one open at a time; start closed on mobile ----------
+  var faqs = document.querySelectorAll('.faq-list details');
+  faqs.forEach(function (d) {
+    d.addEventListener('toggle', function () {
+      if (!d.open) return;
+      faqs.forEach(function (o) { if (o !== d) o.open = false; });
+    });
+  });
+  if (mobileQuery.matches) faqs.forEach(function (d) { d.open = false; });
+
+  // ---------- Quote form → WhatsApp ----------
+  var form = document.getElementById('quote-form');
+  if (form) {
+    var product = new URLSearchParams(location.search).get('product');
+    if (product && form.elements.details && !form.elements.details.value) {
+      form.elements.details.value = 'Product: ' + product + '\nCapacity: \nColour: ';
+    }
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!form.reportValidity()) return;
+      var f = form.elements;
+      var lines = ['Hello Trendy Packaging, I would like a quote.', ''];
+      [['Name', f.name], ['Company', f.company], ['Phone', f.phone], ['Quantity', f.quantity]]
+        .forEach(function (pair) {
+          var v = pair[1].value.trim();
+          if (v) lines.push(pair[0] + ': ' + v);
+        });
+      lines.push('', f.details.value.trim());
+      var url = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(lines.join('\n'));
+      window.open(url, '_blank', 'noopener');
+    });
+  }
+
+  // ---------- Map: load the heavy Google embed only when asked ----------
+  var map = document.querySelector('.map[data-embed]');
+  var mapBtn = map && map.querySelector('.map-load');
+  if (mapBtn) {
+    mapBtn.addEventListener('click', function () {
+      var frame = document.createElement('iframe');
+      frame.src = map.dataset.embed;
+      frame.title = 'Map to Trendy Packaging Ghana, Martey Carpenter Road, Spintex';
+      frame.referrerPolicy = 'no-referrer-when-downgrade';
+      map.appendChild(frame);
+      mapBtn.remove();
+    });
+  }
+
+  // ---------- Product gallery ----------
+  var mainImg = document.querySelector('.gallery-main img');
+  var mainSource = document.querySelector('.gallery-main source');
+  document.querySelectorAll('.thumb').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var img = btn.querySelector('img');
+      var source = btn.querySelector('source');
+      if (mainSource && source) mainSource.srcset = source.srcset;
+      mainImg.src = img.src;
+      mainImg.alt = img.alt;
+      document.querySelectorAll('.thumb').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b === btn));
       });
-
-      let portfolioFilters = select('#portfolio-flters li', true);
-
-      on('click', '#portfolio-flters li', function(e) {
-        e.preventDefault();
-        portfolioFilters.forEach(function(el) {
-          el.classList.remove('filter-active');
-        });
-        this.classList.add('filter-active');
-
-        portfolioIsotope.arrange({
-          filter: this.getAttribute('data-filter')
-        });
-        portfolioIsotope.on('arrangeComplete', function() {
-          AOS.refresh()
-        });
-      }, true);
-    }
-
-  });
-
-  /**
-   * Initiate portfolio lightbox 
-   */
-  const portfolioLightbox = GLightbox({
-    selector: '.portfolio-lightbox'
-  });
-
-  /**
-   * Portfolio details slider
-   */
-  new Swiper('.portfolio-details-slider', {
-    speed: 400,
-    loop: true,
-    autoplay: {
-      delay: 5000,
-      disableOnInteraction: false
-    },
-    pagination: {
-      el: '.swiper-pagination',
-      type: 'bullets',
-      clickable: true
-    }
-  });
-
-  /**
-   * Clients Slider
-   */
-  new Swiper('.clients-slider', {
-    speed: 400,
-    loop: true,
-    autoplay: {
-      delay: 5000,
-      disableOnInteraction: false
-    },
-    slidesPerView: 'auto',
-    pagination: {
-      el: '.swiper-pagination',
-      type: 'bullets',
-      clickable: true
-    },
-    breakpoints: {
-      320: {
-        slidesPerView: 2,
-        spaceBetween: 40
-      },
-      480: {
-        slidesPerView: 3,
-        spaceBetween: 60
-      },
-      640: {
-        slidesPerView: 4,
-        spaceBetween: 80
-      },
-      992: {
-        slidesPerView: 6,
-        spaceBetween: 120
-      }
-    }
-  });
-
-  /**
-   * Animation on scroll
-   */
-  window.addEventListener('load', () => {
-    AOS.init({
-      duration: 1000,
-      easing: "ease-in-out",
-      once: true,
-      mirror: false
     });
   });
 
-})()
+  // ---------- Footer year ----------
+  document.querySelectorAll('[data-year]').forEach(function (el) {
+    el.textContent = new Date().getFullYear();
+  });
+})();
